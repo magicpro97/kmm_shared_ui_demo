@@ -1,18 +1,11 @@
 package com.cdev.kmmsharedui.di
 
-import com.cdev.kmmsharedui.data.local.dao.UserDAO
-import com.cdev.kmmsharedui.data.local.dao.UserDAOImpl
+import CoroutineProvider
+import CoroutineProviderImpl
 import com.cdev.kmmsharedui.data.local.entities.UserEntity
-import com.cdev.kmmsharedui.data.local.shared_preference.MySharedPref
-import com.cdev.kmmsharedui.data.remote.service.UserKtorService
-import com.cdev.kmmsharedui.data.remote.service.UserKtorServiceImpl
-import com.cdev.kmmsharedui.data.repository.UserRepository
-import com.cdev.kmmsharedui.data.repository.UserRepositoryImpl
-import com.cdev.kmmsharedui.domain.usecase.home.GetUsersUseCase
-import com.cdev.kmmsharedui.domain.util.CoroutineProvider
-import com.cdev.kmmsharedui.domain.util.CoroutineProviderImpl
-import com.cdev.kmmsharedui.presentation.home.HomeScreenModel
-import com.cdev.kmmsharedui.presentation.userdetail.UserDetailScreenModel
+import com.cdev.kmmsharedui.featureHomeModule
+import com.cdev.kmmsharedui.featureUserModule
+import com.cdev.kmmsharedui.shared_preference.MySharedPref
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -28,7 +21,6 @@ import io.realm.kotlin.RealmConfiguration
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import org.koin.core.context.startKoin
-import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
 
@@ -52,8 +44,19 @@ fun commonModule(enableNetworkLogs: Boolean, baseUrl: String, mySharedPref: MySh
     getDataModule(
         enableNetworkLogs,
         baseUrl,
-        mySharedPref
-    ) + getUseCaseModule() + getHelperModule() + screenModelsModule
+        mySharedPref,
+    ) + getHelperModule() + featureUserModule + featureHomeModule + dbModule()
+
+fun dbModule() = module {
+    //Database
+    single {
+        Realm.open(
+            RealmConfiguration
+                .Builder(schema = setOf(UserEntity::class))
+                .build()
+        )
+    }
+}
 
 fun getHelperModule() = module {
     single<CoroutineProvider> {
@@ -65,34 +68,7 @@ fun getDataModule(enableNetworkLogs: Boolean, baseUrl: String, mySharedPref: MyS
     single {
         createHttpClient(enableNetworkLogs, baseUrl)
     }
-
-    single {
-        Realm.open(
-            RealmConfiguration
-                .Builder(schema = setOf(UserEntity::class))
-                .build()
-        )
-    }
-
-    single<UserDAO> {
-        UserDAOImpl(
-            get()
-        )
-    }
-
-    single<UserKtorService> {
-        UserKtorServiceImpl(
-            get()
-        )
-    }
-
-    single<UserRepository> {
-        UserRepositoryImpl(
-            get(),
-            get(),
-            get()
-        )
-    }
+    single { mySharedPref }
 }
 
 @OptIn(ExperimentalSerializationApi::class)
@@ -132,14 +108,4 @@ fun createHttpClient(enableNetworkLogs: Boolean, baseUrl: String) = HttpClient {
     }
 }
 
-var screenModelsModule = module {
-    factoryOf(::HomeScreenModel)
-    factoryOf(::UserDetailScreenModel)
-}
-
-fun getUseCaseModule() = module {
-    single {
-        GetUsersUseCase(get())
-    }
-}
 

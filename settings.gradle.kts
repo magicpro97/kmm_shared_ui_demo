@@ -28,4 +28,10 @@ dependencyResolutionManagement {
     }
 }
 
+include(":core:domain")
+include(":core:data")
+include(":core:utils")
+include(":core:common")
 include(":composeApp")
+include(":feature:user")
+include(":feature:home")

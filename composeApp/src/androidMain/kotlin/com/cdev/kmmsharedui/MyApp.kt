@@ -1,9 +1,9 @@
 package com.cdev.kmmsharedui
 
 import android.app.Application
-import com.cdev.kmmsharedui.data.local.shared_preference.MySharedPref
 import com.cdev.kmmsharedui.di.initKoin
 import com.cdev.kmmsharedui.helper.MyBuildConfigure
+import com.cdev.kmmsharedui.shared_preference.MySharedPref
 import org.koin.dsl.module
 
 class MyApp : Application() {

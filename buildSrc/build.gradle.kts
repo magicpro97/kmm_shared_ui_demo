@@ -1,4 +1,4 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 repositories {
     google()
@@ -10,11 +10,12 @@ plugins {
     kotlin("jvm") version "2.0.20"
 }
 
-val compileKotlin: KotlinCompile by tasks
-compileKotlin.compilerOptions {
-    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_17
+    }
 }
-val compileTestKotlin: KotlinCompile by tasks
-compileTestKotlin.compilerOptions {
-    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+
+dependencies {
+    compileOnly(kotlin("gradle-plugin"))
 }
